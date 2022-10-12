@@ -12,6 +12,7 @@ class ApiController extends Controller
      * Cria uma nova tarefa
      * @param Request $request
      * @return string[]
+     * @author Pierri Alexander Vidmar
      */
     public function createTodo(Request $request) {
         $array = ['error' => ''];
@@ -36,22 +37,36 @@ class ApiController extends Controller
         return $array;
     }
 
+
     /**
      * Retorna todos os dados das tarefas do servidor
      * @return string[]
+     * @author Pierri Alexander Vidmar
      */
     public function readAllTodos() {
         $array = ['error' => ''];
 
-        $array['list'] = Todo::all();
+        // PAGINAÇÃO: Buscamos os itens com limite de 2 itens por página
+        $todos = Todo::simplePaginate(2);
+
+        // Se quiser uma condição na paginação
+        // $todos = Todo::where('done', 1)->simplePaginate(2);
+
+        // Armazenamos em list os itens
+        $array['list'] = $todos->items();
+
+        // Mostra a página atual
+        $array['current_page'] = $todos->currentPage();
 
         return $array;
     }
+
 
     /**
      * Retorna uma única tarefa
      * @param $id
      * @return string[]
+     * @author Pierri Alexander Vidmar
      */
     public function readTodo($id) {
         $array = ['error' => ''];
@@ -69,6 +84,13 @@ class ApiController extends Controller
     }
 
 
+    /**
+     * Realiza a atualização de uma única tarefa.
+     * @param $id
+     * @param Request $request
+     * @return string[]
+     * @author Pierri Alexander Vidmar
+     */
     public function updateTodo($id, Request $request) {
         $array = ['error' => ''];
 
@@ -98,7 +120,7 @@ class ApiController extends Controller
             if($title) {
                 $todo->title = $title;
             }
-            if($done) {
+            if($done !== NULL) {
                 $todo->done = $done;
             }
             // Salva.
@@ -111,8 +133,20 @@ class ApiController extends Controller
         return $array;
     }
 
-    public function deleteTodo() {
 
+    /**
+     * Realiza a exclusão de uma única tarefa.
+     * @param $id
+     * @return string[]
+     * @author Pierri Alexander Vidmar
+     */
+    public function deleteTodo($id) {
+        $array = ['error' => ''];
+
+        $todo = Todo::find($id);
+        $todo->delete();
+
+        return $array;
     }
 
 
